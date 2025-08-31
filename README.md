@@ -21,6 +21,19 @@
 If you’re looking for a “batteries included” library, see LAVIS. If you want a focused, no‑frills training script that you can own and reason about, you’re in the right place.
 
 ---
+## Repository structure
+
+├─ sagemaker/
+│  ├─ train_blip.py              # Training entrypoint (HF Trainer on BLIP)
+│  ├─ inference.py               # SageMaker PyTorch model server handlers
+│  ├─ launch_training.py         # Create & run a SageMaker training job
+│  ├─ deploy_endpoint.py         # Create a real-time endpoint (or batch)
+│  ├─ requirements.txt           # Pinned libs for training/inference in DLC
+│  └─ README_SAGEMAKER.md        # One-page runbook for teammates
+├─ tests/
+│  └─ test_inference_handler.py  # Smoke test for inference handlers
+└─ .github/workflows/ci.yaml     # Lint + unit test (optional bonus)
+
 
 ## TL;DR – quick start
 
@@ -189,16 +202,6 @@ You can also point both `from_pretrained` calls to `"Salesforce/blip-image-capti
 
 ---
 
-## Extending this repo (suggested next steps)
-
-- Add a small CLI (Typer/Hydra) to override any config field without editing the file.
-- Swap models: try `Salesforce/blip-image-captioning-large` or BLIP‑2 for stronger zero‑shot.
-- Integrate parameter‑efficient fine‑tuning (LoRA/IA³) for smaller GPUs.
-- Export to ONNX/OpenVINO for CPU‑only inference; add a minimal FastAPI/Gradio demo.
-- Add unit tests for the collator and metric wrappers; wire GitHub Actions for lint/test.
-
----
-
 ## Acknowledgments & references
 
 - **BLIP paper**: *Bootstrapping Language‑Image Pre‑training for Unified Vision‑Language Understanding and Generation*, Li et al., 2022.  
@@ -223,8 +226,3 @@ If you use this codebase in academic work, please cite BLIP:
 ```
 
 ---
-
-## License
-
-This repository’s code is provided as‑is under the project’s root license (if not specified, treat it as “all rights reserved”). The BLIP weights and datasets have their **own licenses/terms**—please review them before training or shipping a product.
-
