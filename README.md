@@ -22,7 +22,7 @@ If you’re looking for a “batteries included” library, see LAVIS. If you wa
 
 ---
 ## Repository structure
-
+```
 ├─ sagemaker/
 │  ├─ train_blip.py              # Training entrypoint (HF Trainer on BLIP)
 │  ├─ inference.py               # SageMaker PyTorch model server handlers
@@ -33,7 +33,7 @@ If you’re looking for a “batteries included” library, see LAVIS. If you wa
 ├─ tests/
 │  └─ test_inference_handler.py  # Smoke test for inference handlers
 └─ .github/workflows/ci.yaml     # Lint + unit test (optional bonus)
-
+```
 
 ## TL;DR – quick start
 
