@@ -22,7 +22,21 @@ If you’re looking for a “batteries included” library, see LAVIS. If you wa
 
 ---
 ## Repository structure
-```
+<details>
+<summary><code>blip_caption/</code> package structure</summary>
+
+```text
+Image-Captioning-BLIP/
+├─blip_caption/
+│  ├── __init__.py
+│  ├── collator.py        # batch collation with BLIP processor
+│  ├── config.py          # defaults: model, data, training, generation, metrics
+│  ├── data.py            # dataset loading (e.g., Flickr8k / COCO-Karpathy)
+│  ├── inference.py       # single-image caption helper
+│  ├── metrics.py         # BLEU during training; COCO-style post-train metrics
+│  ├── modeling.py        # model/processor builders (BLIP base by default)
+│  ├── training.py        # HF TrainingArguments + Trainer wiring
+│  └── main_train.py      # end-to-end train→evaluate→export entrypoint
 ├─ sagemaker/
 │  ├─ train_blip.py              # Training entrypoint (HF Trainer on BLIP)
 │  ├─ inference.py               # SageMaker PyTorch model server handlers
@@ -32,8 +46,23 @@ If you’re looking for a “batteries included” library, see LAVIS. If you wa
 │  └─ README_SAGEMAKER.md        # One-page runbook for teammates
 ├─ tests/
 │  └─ test_inference_handler.py  # Smoke test for inference handlers
-└─ .github/workflows/ci.yaml     # Lint + unit test (optional bonus)
+└─ .github/workflows/ci.yaml     # Lint + unit test 
 ```
+</details>
+
+
+---
+## 🚀 Model on Hugging Face
+
+[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Image--Captioning--BLIP-yellow.svg)](https://huggingface.co/Amirhossein75/Image-Captioning-Blip)
+
+<p align="center">
+  <a href="https://huggingface.co/Amirhossein75/Image-Captioning-Blip">
+    <img src="https://img.shields.io/badge/🤗%20View%20on%20Hugging%20Face-blueviolet?style=for-the-badge" alt="Hugging Face Repo">
+  </a>
+</p>
+
+---
 
 ## TL;DR – quick start
 
@@ -55,21 +84,6 @@ python -m blip_caption.main_train
 > **Note**: COCO metrics run after training on the validation split and are written to `blip-open-out/coco_metrics.json`. If SPICE throws a Java error, see **Troubleshooting** below.
 
 ---
-
-## Project structure
-
-```
-blip_caption/
-├─ __init__.py
-├─ config.py           # All defaults live here (model paths, data, training, generation, metrics)
-├─ data.py             # Loads Flickr8k or COCO‑Karpathy via 🤗 Datasets, builds train/val/test
-├─ collator.py         # Batch collation using BlipProcessor; builds labels with pad masked to -100
-├─ modeling.py         # Model + processor builders (BLIP base by default); optional vision freeze
-├─ training.py         # HF TrainingArguments + Trainer wiring
-├─ metrics.py          # BLEU (training), COCO metrics (post‑train)
-├─ inference.py        # Single‑image caption helper
-└─ main_train.py       # End‑to‑end train→evaluate→export entrypoint
-```
 
 ### Defaults worth knowing
 
@@ -173,6 +187,87 @@ You can also point both `from_pretrained` calls to `"Salesforce/blip-image-capti
 - For bit‑for‑bit determinism, also set `CUBLAS_WORKSPACE_CONFIG=:16:8` or `:4096:8` and disable certain CuDNN autotune knobs (not wired here by default).
 
 ---
+
+
+### 📉 Loss Curve
+
+The following plot shows the training loss progression:
+
+![Training Loss Curve](assets/train_loss.svg)
+
+The following plot shows the validation loss progression:
+![Training Loss Curve](assets/eval_loss.svg)
+
+*(SVG file generated during training(by tensorboard logs) and stored under `assets/`)*
+
+## 🖥️ Training Hardware & Environment
+
+- **Device:** Laptop (Windows, WDDM driver model)  
+- **GPU:** NVIDIA GeForce **RTX 3080 Ti Laptop GPU** (16 GB VRAM)  
+- **Driver:** **576.52**  
+- **CUDA (driver):** **12.9**  
+- **PyTorch:** **2.8.0+cu129**  
+- **CUDA available:** ✅ 
+
+
+## 📊 Training Logs & Metrics
+
+- **Total FLOPs (training):** `86,423,848,150,821,240,000`  
+- **Training runtime:** `7,141.1743` seconds  
+- **Logging:** TensorBoard-compatible logs in `blip_caption/.../logs`  
+
+You can monitor training live with:
+
+```bash
+tensorboard --logdir blip_caption/.../logs
+```
+### 🏆 Results (Test Split)
+
+<p align="center">
+  <img alt="BLEU4" src="https://img.shields.io/badge/BLEU4-0.9708-2f81f7?style=for-the-badge">
+  <img alt="METEOR" src="https://img.shields.io/badge/METEOR-0.7888-8a2be2?style=for-the-badge">
+  <img alt="CIDEr" src="https://img.shields.io/badge/CIDEr-9.333-0f766e?style=for-the-badge">
+  <img alt="SPICE" src="https://img.shields.io/badge/SPICE-n%2Fa-lightgray?style=for-the-badge">
+</p>
+
+| Metric    | Score |
+|-----------|------:|
+| BLEU‑4    | **0.9708** |
+| METEOR    | **0.7888** |
+| CIDEr     | **9.3330** |
+| SPICE     | — |
+
+<details>
+<summary>Raw JSON</summary>
+
+```json
+{
+  "Bleu_4": 0.9707865195383757,
+  "METEOR": 0.7887653835397767,
+  "CIDEr": 9.332990983959254,
+  "SPICE": null
+}
+```
+</details>
+---
+### 🔁 Reproduce
+
+```bash
+# Train & evaluate with repo defaults
+python -m blip_caption.main_train
+
+# COCO metrics (including CIDEr, METEOR, and optionally SPICE) are saved to:
+cat blip-open-out/coco_metrics.json
+```
+
+---
+## AWS SageMaker
+
+A complete SageMaker recipe is provided in [`sagemaker/README_SAGEMAKER.md`](sagemaker/README_SAGEMAKER.md). It explains how to:
+- set up the environment in SageMaker Studio or a notebook instance,
+- stage datasets in Amazon S3,
+- launch a training job for BLIP,
+- and download model checkpoints/artifacts for inference.
 
 ## GPU & memory guidance
 
